@@ -28,14 +28,14 @@ export default function Home() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/cooking" className="block">
+        {/* <Link href="/cooking" className="block">
           <Card className="h-48 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer bg-white text-black">
             <CardContent className="p-6 h-full flex flex-col justify-center">
               <h2 className="text-2xl font-semibold mb-2">Cooking Calculator</h2>
               <p>Evaluate cooking fish feast profitability quickly.</p>
             </CardContent>
           </Card>
-        </Link>
+        </Link> */}
         <Link href="/leatherwork" className="block">
           <Card className="h-48 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer bg-white text-black">
             <CardContent className="p-6 h-full flex flex-col justify-center">
