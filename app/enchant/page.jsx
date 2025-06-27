@@ -5,6 +5,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation" // 👈 important
+
 
 const componentsListFixed = [
   { name: "Profaned Tinderbox", image: "https://wow.zamimg.com/images/wow/icons/large/inv_misc_tinderboxclosed01.jpg" },
@@ -460,6 +462,90 @@ console.log(recipes);
 
 
 
+// // Couleur selon rentabilité (ta fonction)
+// function getProfitBackgroundColor(profitPct) {
+//   const pct = Math.max(-100, Math.min(100, profitPct));
+//   if (pct < 0) {
+//     const red = 255;
+//     const green = 100 + (pct + 100) * 0.5;
+//     return `rgb(${red}, ${green}, ${green})`;
+//   } else {
+//     const red = 255 - pct * 2;
+//     const green = 255;
+//     return `rgb(${Math.max(red, 55)}, ${green}, 120)`;
+//   }
+// }
+
+// export default function Home() {
+
+  
+//   // Prix composants fixes (clé = nom composant)
+//   const [pricesFixed, setPricesFixed] = useState({});
+//   // Prix composants à rang (clé = nom composant, valeur = [rang1, rang2, rang3])
+//   const [pricesRanks, setPricesRanks] = useState(
+//     Object.fromEntries(
+//       componentsWithRanks.map((comp) => [comp, [0, 0, 0]])
+//     )
+//   );
+//   // Rangs sélectionnés pour chaque composant à rang
+//   const [chosenRanks, setChosenRanks] = useState(
+//     Object.fromEntries(componentsWithRanks.map((comp) => [comp, 1]))
+//   );
+
+//   // Prix de vente par recette
+//   const [salePrices, setSalePrices] = useState({});
+//   const [results, setResults] = useState([]);
+
+//   // Gestion changement prix fixe
+//   const handlePriceFixedChange = (comp, val) => {
+//     setPricesFixed((p) => ({ ...p, [comp]: parseFloat(val) || 0 }));
+//   };
+
+//   // Gestion changement prix rang
+//   const handlePriceRankChange = (comp, rankIdx, val) => {
+//     setPricesRanks((p) => {
+//       const arr = [...p[comp]];
+//       arr[rankIdx] = parseFloat(val) || 0;
+//       return { ...p, [comp]: arr };
+//     });
+//   };
+
+//   // Gestion changement rang choisi
+//   const handleRankSelectChange = (comp, val) => {
+//     setChosenRanks((p) => ({ ...p, [comp]: parseInt(val) }));
+//   };
+
+//   // Calcul
+//   const calculate = () => {
+//     const data = recipes.map((recipe) => {
+//       let cost = 0;
+//       for (const [comp, qty] of Object.entries(recipe.components)) {
+//         if (componentsWithRanks.includes(comp)) {
+//           const rankIndex = chosenRanks[comp] - 1;
+//           cost += (pricesRanks[comp]?.[rankIndex] || 0) * qty;
+//         } else {
+//           cost += (pricesFixed[comp] || 0) * qty;
+//         }
+//       }
+//       const quantity = recipe.quantity || 1;
+//       const saleUnitPrice = salePrices[recipe.name] || 0;
+//       const totalSale = saleUnitPrice * quantity;
+
+//       const margin = totalSale - cost;
+//       const profitPct = cost > 0 ? (margin / cost) * 100 : 0;
+
+//       return {
+//         name: recipe.name,
+//         quantity,
+//         cost,
+//         sale: totalSale,
+//         margin,
+//         profitPct,
+//       };
+//     });
+//     setResults(data.sort((a, b) => b.margin - a.margin));
+//   };
+
 // Couleur selon rentabilité (ta fonction)
 function getProfitBackgroundColor(profitPct) {
   const pct = Math.max(-100, Math.min(100, profitPct));
@@ -475,17 +561,22 @@ function getProfitBackgroundColor(profitPct) {
 }
 
 export default function Home() {
+  // Liste des noms des composants avec rangs pour faciliter la recherche
+  const componentsWithRanksNames = componentsWithRanks.map(c => c.name);
+
   // Prix composants fixes (clé = nom composant)
   const [pricesFixed, setPricesFixed] = useState({});
+  
   // Prix composants à rang (clé = nom composant, valeur = [rang1, rang2, rang3])
   const [pricesRanks, setPricesRanks] = useState(
     Object.fromEntries(
-      componentsWithRanks.map((comp) => [comp, [0, 0, 0]])
+      componentsWithRanks.map((comp) => [comp.name, [0, 0, 0]])
     )
   );
-  // Rangs sélectionnés pour chaque composant à rang
+  
+  // Rangs sélectionnés pour chaque composant à rang (clé = nom composant)
   const [chosenRanks, setChosenRanks] = useState(
-    Object.fromEntries(componentsWithRanks.map((comp) => [comp, 1]))
+    Object.fromEntries(componentsWithRanks.map((comp) => [comp.name, 1]))
   );
 
   // Prix de vente par recette
@@ -511,36 +602,178 @@ export default function Home() {
     setChosenRanks((p) => ({ ...p, [comp]: parseInt(val) }));
   };
 
-  // Calcul
-  const calculate = () => {
-    const data = recipes.map((recipe) => {
-      let cost = 0;
-      for (const [comp, qty] of Object.entries(recipe.components)) {
-        if (componentsWithRanks.includes(comp)) {
-          const rankIndex = chosenRanks[comp] - 1;
-          cost += (pricesRanks[comp]?.[rankIndex] || 0) * qty;
-        } else {
-          cost += (pricesFixed[comp] || 0) * qty;
+
+
+//   const calculate = async () => {
+    
+//   const data = recipes.map((recipe) => {
+//     let cost = 0;
+//     for (const [comp, qty] of Object.entries(recipe.components)) {
+//       if (componentsWithRanksNames.includes(comp)) {
+//         const rankIndex = chosenRanks[comp] - 1;
+//         cost += (pricesRanks[comp]?.[rankIndex] || 0) * qty;
+//       } else {
+//         cost += (pricesFixed[comp] || 0) * qty;
+//       }
+//     }
+//     const quantity = recipe.quantity || 1;
+//     const saleUnitPrice = salePrices[recipe.name] || 0;
+//     const totalSale = saleUnitPrice * quantity;
+
+//     const margin = totalSale - cost;
+//     const profitPct = cost > 0 ? (margin / cost) * 100 : 0;
+
+//     return {
+//       name: recipe.name,
+//       quantity,
+//       cost,
+//       sale: totalSale,
+//       margin,
+//       profitPct,
+//     };
+//   });
+
+//   setResults(data.sort((a, b) => b.margin - a.margin));
+
+//   try {
+//     const response = await fetch("/api/click", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//     });
+
+//     if (!response.ok) {
+//       const errorData = await response.json();
+//       console.warn("Erreur clic API :", errorData.error || response.statusText);
+//     }
+//   } catch (error) {
+//     console.error("Erreur appel API clic :", error);
+//   }
+// };
+
+
+
+
+
+
+
+
+
+// const calculate = async () => {
+//   try {
+//     const response = await fetch("/api/click", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//     });
+
+//     const result = await response.json();
+
+//     if (!response.ok) {
+//       if (response.status === 403) {
+//         alert("Limite atteinte : passez en Premium pour débloquer plus de calculs.");
+//         return;
+//       }
+
+//       console.warn("Erreur clic API :", result.error || response.statusText);
+//       return;
+//     }
+
+//     // ✅ Clic autorisé, on effectue les calculs ici
+//     const data = recipes.map((recipe) => {
+//       let cost = 0;
+//       for (const [comp, qty] of Object.entries(recipe.components)) {
+//         if (componentsWithRanksNames.includes(comp)) {
+//           const rankIndex = chosenRanks[comp] - 1;
+//           cost += (pricesRanks[comp]?.[rankIndex] || 0) * qty;
+//         } else {
+//           cost += (pricesFixed[comp] || 0) * qty;
+//         }
+//       }
+
+//       const quantity = recipe.quantity || 1;
+//       const saleUnitPrice = salePrices[recipe.name] || 0;
+//       const totalSale = saleUnitPrice * quantity;
+
+//       const margin = totalSale - cost;
+//       const profitPct = cost > 0 ? (margin / cost) * 100 : 0;
+
+//       return {
+//         name: recipe.name,
+//         quantity,
+//         cost,
+//         sale: totalSale,
+//         margin,
+//         profitPct,
+//       };
+//     });
+
+//     setResults(data.sort((a, b) => b.margin - a.margin));
+//   } catch (error) {
+//     console.error("Erreur appel API clic :", error);
+//   }
+// };
+
+
+ const router = useRouter(); // 👈 hook pour redirection
+
+  const calculate = async () => {
+    try {
+      const response = await fetch("/api/click", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          alert("Limite atteinte : passez en Premium pour débloquer plus de calculs.");
+          router.push("/plan"); // 👈 redirection
+          return;
         }
+
+        console.warn("Erreur clic API :", result.error || response.statusText);
+        return;
       }
-      const quantity = recipe.quantity || 1;
-      const saleUnitPrice = salePrices[recipe.name] || 0;
-      const totalSale = saleUnitPrice * quantity;
 
-      const margin = totalSale - cost;
-      const profitPct = cost > 0 ? (margin / cost) * 100 : 0;
+      // ✅ Clic autorisé, on effectue les calculs ici
+      const data = recipes.map((recipe) => {
+        let cost = 0;
+        for (const [comp, qty] of Object.entries(recipe.components)) {
+          if (componentsWithRanksNames.includes(comp)) {
+            const rankIndex = chosenRanks[comp] - 1;
+            cost += (pricesRanks[comp]?.[rankIndex] || 0) * qty;
+          } else {
+            cost += (pricesFixed[comp] || 0) * qty;
+          }
+        }
 
-      return {
-        name: recipe.name,
-        quantity,
-        cost,
-        sale: totalSale,
-        margin,
-        profitPct,
-      };
-    });
-    setResults(data.sort((a, b) => b.margin - a.margin));
+        const quantity = recipe.quantity || 1;
+        const saleUnitPrice = salePrices[recipe.name] || 0;
+        const totalSale = saleUnitPrice * quantity;
+
+        const margin = totalSale - cost;
+        const profitPct = cost > 0 ? (margin / cost) * 100 : 0;
+
+        return {
+          name: recipe.name,
+          quantity,
+          cost,
+          sale: totalSale,
+          margin,
+          profitPct,
+        };
+      });
+
+      setResults(data.sort((a, b) => b.margin - a.margin));
+    } catch (error) {
+      console.error("Erreur appel API clic :", error);
+    }
   };
+
+
+
+
+
  return (
     <main className="p-6  mx-auto bg-zinc-800 text-white min-h-screen">
       <h1 className="text-2xl font-bold mb-6 text-white">WoW Alchemy Profit Calculator</h1>
